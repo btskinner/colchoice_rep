@@ -18,15 +18,15 @@ The following public files need to be downloaded:
 
 ### IPEDS
 
-* `eap2004.csv`  
-* `hd2004.csv`  
-* `ic2004.csv`  
-* `ic2004_ay.csv`  
-* `sal2004_a.csv`  
+* [`eap2004.csv`](https://nces.ed.gov/ipeds/datacenter/data/EAP2004.zip)  
+* [`hd2004.csv`](https://nces.ed.gov/ipeds/datacenter/data/HD2004.zip)  
+* [`ic2004.csv`](https://nces.ed.gov/ipeds/datacenter/data/IC2004.zip)  
+* [`ic2004_ay.csv`](https://nces.ed.gov/ipeds/datacenter/data/IC2004_AY.zip)  
+* [`sal2004_a.csv`](https://nces.ed.gov/ipeds/datacenter/data/SAL2004_A.zip)  
 
 ### Delta Cost Project
 
-* `delta_public_00_12.csv`  
+* [`delta_public_00_12.csv`](https://deltacostproject.org/delta-cost-project-database)  
 
 ### Census
 
@@ -43,7 +43,7 @@ Other files already in the data directory:
 ## Simulation
 
 To run the simulations and create the maps in the appendix, you will
-need the following data files from the American Community Survey:  
+need the following data files from the [American Community Survey](https://factfinder.census.gov/faces/nav/jsf/pages/index.xhtml):  
 
 * `ACS_10_5YR_DP05_1.csv`  
 * `ACS_10_5YR_DP05_2.csv`  

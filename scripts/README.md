@@ -4,7 +4,7 @@ Scripts to reproduce analyses and tables should be run in the
 following order.  
 
 1. `makedata.r`  
-2. `analysis.do`  
+2. `analysis.do` (NB: this may take a long time to run)  
 3. `descriptives.r`  
 4. `predictions.r`  
 
