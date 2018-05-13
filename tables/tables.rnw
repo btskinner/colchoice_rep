@@ -1,0 +1,1144 @@
+\documentclass[12pt]{article}
+
+% Packages
+\usepackage[T1]{fontenc}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{threeparttable}
+\usepackage{siunitx}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{apacite}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+
+% Commands
+\newcommand{\RR}{\raggedright\arraybackslash}
+\newcommand{\RL}{\raggedleft\arraybackslash}
+\newcommand{\TC}{\centering\arraybackslash}
+\newcommand{\bX}{\boldsymbol{X}}
+\newcommand{\bZ}{\boldsymbol{Z}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\bgamma}{\boldsymbol{\gamma}}
+\newcommand{\bpsi}{\boldsymbol{\psi}}
+
+
+% Headers and Footers
+\fancypagestyle{first}{%
+  \fancyhead[R]{}
+  \fancyhead[L]{}
+  \fancyfoot[R]{}
+  \fancyfoot[L]{}
+  \fancyfoot[C]{}
+  \renewcommand{\headrulewidth}{0.0pt}
+  \renewcommand{\footrulewidth}{0.0pt}}
+
+\fancypagestyle{rest}{%
+  \fancyhead[L]{\footnotesize\uppercase{College choice: an update [TABLES]}}
+  \fancyhead[R]{\footnotesize\uppercase{Skinner $\mid$ \thepage}}
+  \fancyfoot[R]{}
+  \fancyfoot[L]{}
+  \fancyfoot[C]{}
+  \renewcommand{\headrulewidth}{0.0pt}
+  \renewcommand{\footrulewidth}{0.0pt}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{rest}
+\begin{document}
+\thispagestyle{first}
+
+\begin{center}
+  {\Large Choosing college in the 2000s: An updated analysis using
+  the conditional logistic choice model} \\
+  \vspace{2em}
+  {\LARGE TABLES}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<setup, include=FALSE, cache=FALSE>>=
+# set global chunk options
+opts_chunk$set(fig.align = 'center', fig.show = 'hold', cache = F, dev = 'png',
+               highlight = F, background = '#FFFFFF', echo = F, dpi = 72,
+               message = F, results = 'hide', warning = F)
+options(replace.assign = TRUE, width = 90, scipen = 999)
+@
+
+<<libraries>>=
+## libraries
+lib <- list('dplyr','knitr','readr','xtable')
+lapply(lib, require, character.only = T)
+
+## directories
+tdir <- './csv/'
+odir <- './tex/'
+
+## quick function
+`%+%` <- function(a,b) paste(a, b, sep = '')
+
+@
+
+%% -----------------------------------------------------------------------------
+%% TABLES
+%% -----------------------------------------------------------------------------
+
+<<students, results='asis'>>=
+## read in data
+stu <- as.matrix(read.csv(tdir %+% 'student_descriptives.csv'))
+
+## convert NA to '-'
+stu[is.na(stu)] <- '-'
+
+## add parentheses to sd rows
+sr <- c(9,11,13)
+stu[sr,] <- gsub('(.*)', '(\\1)', stu[sr,])
+stu[15,c(2,5,8)] <- gsub('(.*)', '(\\1)', stu[15,c(2,5,8)])
+
+## vars
+vars <- c(' ',
+          'Female',
+          'Black',
+          'Hispanic',
+          'Asian, Hawaii/P. Islander',
+          'Amer. Indian/Alaska Native',
+          'More than one race',
+          'Parental education',
+          '\\hspace{1em}{(categorical)}',
+          'Family income',
+          '\\hspace{1em}{(categorical)}',
+          'Composite SAT',
+          ' ',
+          'Average \\# of applications',
+          ' ')
+## add rows
+out <- cbind(vars, stu)
+colnames(out) <- c(' ', rep(c('All', 'Attended college', 'Did not attend'), 3))
+
+## header
+head <- c('\\begin{threeparttable}',
+          '\\caption{Descriptive table of student characteristics.}',
+          '\\label{tab:students}',
+          '{\\scriptsize',
+          '\\begin{tabularx}{\\textwidth}{X*9{>{\\TC}p{3.1em}}}',
+          '\\toprule',
+          '& \\multicolumn{3}{c}{Full sample}',
+          '& \\multicolumn{3}{c}{SAT $>$ 1100}',
+          '& \\multicolumn{3}{c}{Income $<$ \\$25k} \\\\',
+          '& \\multicolumn{3}{c}{($N = 9050$)}',
+          '& \\multicolumn{3}{c}{($N = 3020$)}',
+          '& \\multicolumn{3}{c}{($N = 1270$)} \\\\',
+          '\\cmidrule(r){2-4}\\cmidrule(r){5-7}\\cmidrule(r){8-10}')
+## content
+content <- print(xtable(out), include.rownames = FALSE,
+                 caption.placement = 'top', booktabs = TRUE,
+                 only.contents = TRUE,
+                 sanitize.text.function = function(x){x}, floating = FALSE,
+                 print.results = FALSE)
+## footer
+foot <- c('\\end{tabularx}',
+          '}',
+          '\\begin{tablenotes}',
+          '\\footnotesize',
+          '\\item {\\itshape Notes.} Values are percentages unless otherwise noted
+(standard deviations in parentheses). Parental education categorical
+values are roughly ordered: 2 = graduated high school; 4 = graduated
+from a two-year school; 6 = graduated from a four-year school. All
+incomes less than \\$25k correspond to income categorical values 1-7; 5
+= (\\$5k, \\$10k], 9 = (\\$35k, \\$50k], and 10 = (\\$50k, \\$75k]. Per NCES
+regulations for restricted access data, observation numbers have been
+rounded to the nearest 10.',
+          '\\end{tablenotes}',
+          '\\end{threeparttable}')
+
+## write
+writeLines(c(head,content,foot), con = odir %+% 'desc_stu.tex')
+writeLines(c(head,content,foot))
+
+@
+
+\clearpage
+
+<<colleges, results='asis'>>=
+## set up matrix
+out <- matrix('-', 15, 6)
+
+## read in institutional data
+inst <- read.csv(tdir %+% 'institutions.csv')
+
+## create masks
+fpub <- (inst$public == 1 & inst$twoyr == 0)
+fpnp <- (inst$privnp == 1 & inst$twoyr == 0)
+fpfp <- (inst$privfp == 1 & inst$twoyr == 0)
+tpub <- (inst$public == 1 & inst$twoyr == 1)
+tpnp <- (inst$privnp == 1 & inst$twoyr == 1)
+tpfp <- (inst$privfp == 1 & inst$twoyr == 1)
+
+## ---------------------------
+## Ns
+## ---------------------------
+
+out[15,1:6] <- c(nrow(inst[fpub,]),
+                 nrow(inst[fpnp,]),
+                 nrow(inst[fpfp,]),
+                 nrow(inst[tpub,]),
+                 nrow(inst[tpnp,]),
+                 nrow(inst[tpfp,]))
+
+## ---------------------------
+## instate costs
+## ---------------------------
+
+## rescale
+inst$instcost <- inst$instcost * 1000
+
+## means
+out[1,1:6] <- c(round(mean(inst$instcost[fpub])),
+                round(mean(inst$instcost[fpnp])),
+                round(mean(inst$instcost[fpfp])),
+                round(mean(inst$instcost[tpub])),
+                round(mean(inst$instcost[tpnp])),
+                round(mean(inst$instcost[tpfp])))
+
+## sd
+out[2,1:6] <- c(round(sd(inst$instcost[fpub])),
+                round(sd(inst$instcost[fpnp])),
+                round(sd(inst$instcost[fpfp])),
+                round(sd(inst$instcost[tpub])),
+                round(sd(inst$instcost[tpnp])),
+                round(sd(inst$instcost[tpfp])))
+
+## ---------------------------
+## outstate costs
+## ---------------------------
+
+## rescale
+inst$outscost <- inst$outscost * 1000
+
+## means
+out[3,1:6] <- c(round(mean(inst$outscost[fpub])),
+                round(mean(inst$outscost[fpnp])),
+                round(mean(inst$outscost[fpfp])),
+                round(mean(inst$outscost[tpub])),
+                round(mean(inst$outscost[tpnp])),
+                round(mean(inst$outscost[tpfp])))
+
+## sd
+out[4,1:6] <- c(round(sd(inst$outscost[fpub])),
+                round(sd(inst$outscost[fpnp])),
+                round(sd(inst$outscost[fpfp])),
+                round(sd(inst$outscost[tpub])),
+                round(sd(inst$outscost[tpnp])),
+                round(sd(inst$outscost[tpfp])))
+
+## ---------------------------
+## instructional/FTE
+## ---------------------------
+
+## rescale
+inst$instfte <- inst$instfte * 1000
+
+## means
+out[5,1:6] <- c(round(mean(inst$instfte[fpub])),
+                round(mean(inst$instfte[fpnp])),
+                round(mean(inst$instfte[fpfp])),
+                round(mean(inst$instfte[tpub])),
+                round(mean(inst$instfte[tpnp])),
+                round(mean(inst$instfte[tpfp])))
+
+## sd
+out[6,1:6] <- c(round(sd(inst$instfte[fpub])),
+                round(sd(inst$instfte[fpnp])),
+                round(sd(inst$instfte[fpfp])),
+                round(sd(inst$instfte[tpub])),
+                round(sd(inst$instfte[tpnp])),
+                round(sd(inst$instfte[tpfp])))
+
+## ---------------------------
+## SAT
+## ---------------------------
+
+## means
+out[7,1:6] <- c(round(mean(inst$sat[fpub])),
+                round(mean(inst$sat[fpnp])),
+                round(mean(inst$sat[fpfp])),
+                round(mean(inst$sat[tpub])),
+                round(mean(inst$sat[tpnp])),
+                round(mean(inst$sat[tpfp])))
+
+## sd
+out[8,1:6] <- c(round(sd(inst$sat[fpub])),
+                round(sd(inst$sat[fpnp])),
+                round(sd(inst$sat[fpfp])),
+                round(sd(inst$sat[tpub])),
+                round(sd(inst$sat[tpnp])),
+                round(sd(inst$sat[tpfp])))
+
+## ---------------------------
+## Student faculty ratio
+## ---------------------------
+
+## means
+out[9,1:6] <- c(round(mean(inst$sfr[fpub]),2),
+                round(mean(inst$sfr[fpnp]),2),
+                round(mean(inst$sfr[fpfp]),2),
+                round(mean(inst$sfr[tpub]),2),
+                round(mean(inst$sfr[tpnp]),2),
+                round(mean(inst$sfr[tpfp]),2))
+
+## sd
+out[10,1:6] <- c(round(sd(inst$sfr[fpub]),2),
+                 round(sd(inst$sfr[fpnp]),2),
+                 round(sd(inst$sfr[fpfp]),2),
+                 round(sd(inst$sfr[tpub]),2),
+                 round(sd(inst$sfr[tpnp]),2),
+                 round(sd(inst$sfr[tpfp]),2))
+
+## ---------------------------
+## % TT faculty
+## ---------------------------
+
+## rescale
+inst$ttfacpct <- inst$ttfacpct * 10
+
+## means
+out[11,1:6] <- c(round(mean(inst$ttfacpct[fpub]),2),
+                round(mean(inst$ttfacpct[fpnp]),2),
+                round(mean(inst$ttfacpct[fpfp]),2),
+                round(mean(inst$ttfacpct[tpub]),2),
+                round(mean(inst$ttfacpct[tpnp]),2),
+                round(mean(inst$ttfacpct[tpfp]),2))
+
+## sd
+out[12,1:6] <- c(round(sd(inst$ttfacpct[fpub]),2),
+                 round(sd(inst$ttfacpct[fpnp]),2),
+                 round(sd(inst$ttfacpct[fpfp]),2),
+                 round(sd(inst$ttfacpct[tpub]),2),
+                 round(sd(inst$ttfacpct[tpnp]),2),
+                 round(sd(inst$ttfacpct[tpfp]),2))
+
+## ---------------------------
+## FTE
+## ---------------------------
+
+## rescale
+inst$fte <- inst$fte * 1000
+
+## means
+out[13,1:6] <- c(round(mean(inst$fte[fpub])),
+                 round(mean(inst$fte[fpnp])),
+                 round(mean(inst$fte[fpfp])),
+                 round(mean(inst$fte[tpub])),
+                 round(mean(inst$fte[tpnp])),
+                 round(mean(inst$fte[tpfp])))
+
+## sd
+out[14,1:6] <- c(round(sd(inst$fte[fpub])),
+                 round(sd(inst$fte[fpnp])),
+                 round(sd(inst$fte[fpfp])),
+                 round(sd(inst$fte[tpub])),
+                 round(sd(inst$fte[tpnp])),
+                 round(sd(inst$fte[tpfp])))
+
+
+## add parentheses to sd rows
+sr <- c(2,4,6,8,10,12,14)
+out[sr,c(1:6)] <- gsub('(.*)', '(\\1)', out[sr,c(1:6)])
+
+## vars
+vars <- c('In-state cost',
+          ' ',
+          'Out-of-state cost',
+          ' ',
+          'Instructional expend. per FTE',
+          ' ',
+          'Student body median SAT',
+          ' ',
+          'Student faculty ratio',
+          ' ',
+          '\\% Tenured/tenure track faculty',
+          ' ',
+          'FTE student enrollment',
+          ' ',
+          '$N$')
+## add rows
+out <- cbind(vars, out)
+colnames(out) <- c(' ',
+                   'Public', 'Private, non-profit', 'Private, for-profit',
+                   'Public', 'Private, non-profit', 'Private, for-profit')
+
+## header
+head <- c('\\begin{threeparttable}',
+          '\\caption{Descriptive table of colleges ' %+%
+          'and universities in choice set.}',
+          '\\label{tab:colleges}',
+          '{\\scriptsize',
+          '\\begin{tabularx}{\\textwidth}{X*6{>{\\TC}p{5.1em}}}',
+          '\\toprule',
+          '& \\multicolumn{3}{c}{Four-year} & \\multicolumn{3}{c}{Two-year} \\\\',
+          '\\cmidrule(r){2-4}\\cmidrule(r){5-7}')
+## content
+content <- print(xtable(out), include.rownames = FALSE,
+                 caption.placement = 'top', booktabs = TRUE,
+                 only.contents = TRUE,
+                 sanitize.text.function = function(x){x}, floating = FALSE,
+                 hline.after = c(-1, 0, nrow(out) - 1, nrow(out)),
+                 print.results = FALSE)
+## footer
+foot <- c('\\end{tabularx}',
+          '}',
+          '\\begin{tablenotes}',
+          '\\footnotesize',
+          '\\item {\\itshape Notes.} Institutional characteristics come from IPEDS
+and the Delta Cost Project.  Only Title IV postsecondary institutions
+that have a physical location in 2004 are included. In-state costs are
+in-state tuition and fees less average institutional, state, and
+federal grant awards; out-of-state costs are out-of-state tuition and
+fees less average institutional and federal grant awards. Median SAT
+scores are the average of the 25th and 75th percentile SAT composite
+scores reported by the institution. For institutions that did not
+report SAT percentiles, the median score was imputed using either the
+middle value in the range given by Barron\'s Competitive Index for its
+competitiveness category or, for all non-competitive and non-rated
+institutions (including two-year institutions), given a score of 700
+per Long (2004).',
+          '\\end{tablenotes}',
+          '\\end{threeparttable}')
+
+## write
+writeLines(c(head,content,foot), con = odir %+% 'desc_col.tex')
+writeLines(c(head,content,foot))
+
+@
+
+<<results, results='asis'>>=
+
+## set up matrix
+out <- matrix(' ',26,8)
+
+## read in Long's data
+longtab <- read_csv(tdir %+% 'long_tab_clogit.csv', col_names = FALSE)
+
+## read in data
+main <- read.csv(tdir %+% 'asclogit_main_mat.csv')
+
+## exponentiate betas
+main$b <- exp(main$b)
+
+## grab Ns and cases
+mN <- main$N[1]; mcases <- main$case[1]
+
+## subset to betas and z-scores
+main <- main[,1:2]
+
+## convert z scores to absolute values
+main$z <- abs(main$z)
+
+## round and format
+main$b <- format(round(main$b,4),4)
+main$z <- format(round(main$z,2),2)
+
+## add stars
+hiz <- (as.numeric(main$z) >= 4.25)
+main$b[hiz] <- gsub('(.*)', '\\1**', main$b[hiz])
+hiz <- (as.numeric(main$z) >= 3.57 & as.numeric(main$z) < 4.25)
+main$b[hiz] <- gsub('(.*)', '\\1*', main$b[hiz])
+
+## zip to alternate; round; format
+main <- c(rbind(main$b, main$z))
+
+## chunk 1
+out[2:5,1:6] <- as.matrix(longtab[c(1,2,5,6),])
+out[2:5,7] <- main[c(1,2,5,6)]
+
+## chunk 2
+out[8:13,1:6] <- as.matrix(longtab[c(9,10,13:16),])
+out[8:13,7] <- main[c(11,12,15:18)]
+
+## chunk 3
+out[16:19,1:6] <- as.matrix(longtab[c(17:20),])
+out[16:19,7] <- main[c(19,20,23,24)]
+
+## chunk 4
+out[22:23,1:6] <- as.matrix(longtab[c(21:22),])
+out[22:23,7] <- main[c(31,32)]
+
+## two year spots: chunk 1
+out[2:5,8] <- main[c(33,34,37,38)]
+
+## two year spots: chunk 2
+out[8:9,8] <- main[41:42]
+
+## add Ns and cases
+out[25:26,1:6] <- as.matrix(longtab[23:24,])
+out[25,7] <- mcases; out[26,7] <- round(mN, -3)
+
+## add hyphens
+out[25:26,8] <- '-'
+
+## add parentheses to se rows
+sr <- c(3,5,9,11,13,17,19,23)
+out[sr,7] <- gsub('(.*)', '(\\1)', out[sr,7])
+sr <- c(3,5,9)
+out[sr,8] <- gsub('(.*)', '(\\1)', out[sr,8])
+
+## make last column bold
+out[,7:8] <- gsub('(.*)', '\\{\\\\bfseries \\1 \\}', out[,7:8])
+
+## replace NA with open string
+out[is.na(out)] <- ' '
+
+vars <- c('{\\itshape College costs}',
+          'Cost',
+          '\\hspace{1em}(per \\$1000)',
+          'Distance',
+          '\\hspace{1em}(per 100 miles)',
+          ' ',
+          '{\\itshape Instructional Quality}',
+          'Instructional expend.',
+          '\\hspace{1em}(per \\$1000)',
+          'Student faculty ratio',
+          ' ',
+          'Tenure track faculty',
+          '\\hspace{1em}(per 10\\% pts)',
+          ' ',
+          '{\\itshape Student college match}',
+          'Student SAT percentile',
+          '\\hspace{1em}larger (per 10\\% pts)',
+          'School SAT percentile',
+          '\\hspace{1em}larger (per 10\\% pts)',
+          ' ',
+          '{\\itshape College level}',
+          'Two-year dummy',
+          ' ',
+          ' ',
+          'Students',
+          'Choice combinations')
+
+## add rows
+out <- cbind(vars, out)
+colnames(out) <- c(' ', 'Main effect', 'Two-year',
+                   'Main effect', 'Two-year',
+                   'Main effect', 'Two-year',
+                   '{\\bfseries Main effect}', '{\\bfseries Two-year}')
+
+## header
+head <- c('\\begin{table}',
+          '\\begin{threeparttable}',
+          '\\caption{Results of conditional logistic choice model of ' %+%
+          'student college decision among students who attended a ' %+%
+          'postsecondary institution within two years of high school ' %+%
+          'graduation.}',
+          '\\label{tab:clogit}',
+          '{\\scriptsize',
+          '\\begin{tabularx}{\\textwidth}{@{}l*8{>{\\TC}X}@{}}',
+          '\\toprule',
+          '& \\multicolumn{6}{c}{Long (2004)} &  \\\\',
+          '\\cmidrule(r){2-7}',
+          '& \\multicolumn{2}{c}{1972} & \\multicolumn{2}{c}{1982}',
+          '& \\multicolumn{2}{c}{1992} & ' %+%
+          '\\multicolumn{2}{c}{{\\bfseries 2004}} \\\\',
+          '\\cmidrule(r){2-3}\\cmidrule(r){4-5}\\cmidrule(r){6-7}' %+%
+          '\\cmidrule(r){8-9}')
+
+## content
+content <- print(xtable(out),
+                 include.rownames = FALSE,
+                 caption.placement = 'top',
+                 booktabs = TRUE,
+                 only.contents = TRUE,
+                 sanitize.text.function = function(x){x},
+                 floating = FALSE,
+                 hline.after = c(-1, 0, nrow(out) - 2, nrow(out)),
+                 print.results = FALSE)
+
+## footer
+foot <- c('\\end{tabularx}',
+          '}',
+          '\\begin{tablenotes}',
+          '\\footnotesize',
+          '\\vspace{.5em}',
+          '\\item {\\itshape Notes.} Estimates in the first six columns for the
+  1972, 1982, and 1992 cohorts are reprinted from Long (2004) for
+  comparison. Bolded estimates in the last two columns are results
+  from new analyses that use data from the NCES Education Longitudinal
+  Study of 2002, IPEDS, and the Delta Cost Project. Throughout, odds
+  ratios are reported with $z$-scores in parentheses. Standard errors
+  (not reported) were clustered at the student level. Median SAT
+  values of 700 were given to all two-year and non-selective
+  institutions. Distances are calculated using the centroid of the
+  student\'s census block group in 10th grade and the geocoordinates of
+  each institution option. Costs are tuition and fees less average
+  grants, taking into account whether student resides in the same
+  state. Additional controls not reported include: squared and cubic
+  distance, squared cost, squared instructional expenditures per FTE
+  student, SAT match variables squared, FTE, FTE squared, and
+  interactions between polynomials and the indicator for two-year
+  institutions. Per NCES regulations for restricted access data, both
+  observation cell sizes and unique cases have been rounded to the
+  nearest 10 and 1000, respectively, in the last two columns of new
+  estimates. Note that Long\'s specification used proportion of faculty
+  with a PhD rather than the proportion on the tenure track.',
+          '\\item $^{**}$ indicates significance at the 5\\% level, ' %+%
+          'with adjustment for significance to take into account ' %+%
+          'potential survey design effects ($z_{critical} \\approx 4.25$)',
+          '\\item $^{*}$ indicates significance at the 10\\% level, ' %+%
+          'with adjustment for significance to take into account ' %+%
+          'potential survey design effects ($z_{critical} \\approx 3.57$)',
+          '\\end{tablenotes}',
+          '\\end{threeparttable}',
+          '\\end{table}')
+
+## write
+writeLines(c(head,content,foot), con = odir %+% 'cl_long.tex')
+writeLines(c(head,content,foot))
+
+@
+
+<<results_func>>=
+
+resultsTabPrint <- function(main_csv,
+                            appl_csv,
+                            atap_csv,
+                            caption,
+                            lab,
+                            note,
+                            texfile) {
+
+
+    ## set up matrix
+    out <- matrix(' ', 26, 6)
+
+    ## read in data
+    main <- read.csv(tdir %+% main_csv)
+    appl <- read.csv(tdir %+% appl_csv)
+    atap <- read.csv(tdir %+% atap_csv)
+
+    ## exponentiate betas
+    main$b <- exp(main$b)
+    appl$b <- exp(appl$b)
+    atap$b <- exp(atap$b)
+
+    ## grab Ns and cases
+    N <- c(main$N[1], appl$N[1], atap$N[1])
+    cases <- c(main$case[1], appl$case[1], atap$case[1])
+
+    ## convert z scores to absolute values
+    main$z <- abs(main$z)
+    appl$z <- abs(appl$z)
+    atap$z <- abs(atap$z)
+
+    ## round and format
+    main$b <- format(round(main$b,4),4)
+    appl$b <- format(round(appl$b,4),4)
+    atap$b <- format(round(atap$b,4),4)
+    main$z <- format(round(main$z,2),2)
+    appl$z <- format(round(appl$z,2),2)
+    atap$z <- format(round(atap$z,2),2)
+
+    ## add stars
+    hiz <- (as.numeric(main$z) >= 4.25)
+    main$b[hiz] <- gsub('(.*)', '\\1**', main$b[hiz])
+    hiz <- (as.numeric(main$z) >= 3.57 & as.numeric(main$z) < 4.25)
+    main$b[hiz] <- gsub('(.*)', '\\1*', main$b[hiz])
+    hiz <- (as.numeric(appl$z) >= 4.25)
+    appl$b[hiz] <- gsub('(.*)', '\\1**', appl$b[hiz])
+    hiz <- (as.numeric(appl$z) >= 3.57 & as.numeric(appl$z) < 4.25)
+    appl$b[hiz] <- gsub('(.*)', '\\1*', appl$b[hiz])
+    hiz <- (as.numeric(atap$z) >= 4.25)
+    atap$b[hiz] <- gsub('(.*)', '\\1**', atap$b[hiz])
+    hiz <- (as.numeric(atap$z) >= 3.57 & as.numeric(atap$z) < 4.25)
+    atap$b[hiz] <- gsub('(.*)', '\\1*', atap$b[hiz])
+
+    ## zip to alternate; round; format
+    main <- c(rbind(main$b, main$z))
+    appl <- c(rbind(appl$b, appl$z))
+    atap <- c(rbind(atap$b, atap$z))
+
+    ## chunk 1
+    out[2:5,1] <- main[c(1,2,5,6)]
+    out[2:5,3] <- appl[c(1,2,5,6)]
+    out[2:5,5] <- atap[c(1,2,5,6)]
+
+    ## chunk 2
+    out[8:13,1] <- main[c(11,12,15:18)]
+    out[8:13,3] <- appl[c(11,12,15:18)]
+    out[8:13,5] <- atap[c(11,12,15:18)]
+
+    ## chunk 3
+    out[16:19,1] <- main[c(19,20,23,24)]
+    out[16:19,3] <- appl[c(19,20,23,24)]
+    out[16:19,5] <- atap[c(19,20,23,24)]
+
+    ## chunk 4
+    out[22:23,1] <- main[c(31,32)]
+    out[22:23,3] <- appl[c(31,32)]
+    out[22:23,5] <- atap[c(31,32)]
+
+    ## two year spots: chunk 1
+    out[2:5,2] <- main[c(33,34,37,38)]
+    out[2:5,4] <- appl[c(33,34,37,38)]
+    out[2:5,6] <- atap[c(33,34,37,38)]
+
+    ## two year spots: chunk 2
+    out[8:9,2] <- main[41:42]
+    out[8:9,4] <- appl[41:42]
+    out[8:9,6] <- atap[41:42]
+
+    ## add Ns and cases
+    odd <- c(1,3,5)
+    even <- c(2,4,6)
+    out[25, odd] <- cases
+    out[26, odd] <- round(N, -3)
+
+    ## add hyphens
+    out[25:26, even] <- '-'
+
+    ## add parentheses to se rows
+    sr <- c(3,5,9,11,13,17,19,23)
+    out[sr, odd] <- gsub('(.*)', '(\\1)', out[sr, odd])
+    sr <- c(3,5,9)
+    out[sr, even] <- gsub('(.*)', '(\\1)', out[sr, even])
+
+    ## replace NA with open string
+    out[is.na(out)] <- ' '
+
+    vars <- c('{\\itshape College costs}',
+              'Cost',
+              '\\hspace{1em}(per \\$1000)',
+              'Distance',
+              '\\hspace{1em}(per 100 miles)',
+              ' ',
+              '{\\itshape Instructional Quality}',
+              'Instructional expend.',
+              '\\hspace{1em}(per \\$1000)',
+              'Student faculty ratio',
+              ' ',
+              'Tenure track faculty',
+              '\\hspace{1em}(per 10\\% pts)',
+              ' ',
+              '{\\itshape Student college match}',
+              'Student SAT percentile',
+              '\\hspace{1em}larger (per 10\\% pts)',
+              'School SAT percentile',
+              '\\hspace{1em}larger (per 10\\% pts)',
+              ' ',
+              '{\\itshape College level}',
+              'Two-year dummy',
+              ' ',
+              ' ',
+              'Students',
+              'Choice combinations')
+
+    ## add rows
+    out <- cbind(vars, out)
+    colnames(out) <- c(' ', 'Main effect', 'Two-year',
+                       'Main effect', 'Two-year',
+                       'Main effect', 'Two-year')
+
+    ## header
+    head <- c('\\begin{table}',
+              '\\begin{threeparttable}',
+              '\\caption{' %+% caption %+% '}',
+              '\\label{' %+% lab %+% '}',
+              '{\\scriptsize',
+              '\\begin{tabularx}{\\textwidth}{@{}p{2in}*6{>{\\TC}X}@{}}',
+              '\\toprule',
+              '&\\multicolumn{2}{c}{Attend} & \\multicolumn{2}{c}{Apply}',
+              '&\\multicolumn{2}{c}{Attend$\\mid$Apply} \\\\',
+              '\\cmidrule(r){2-3}\\cmidrule(r){4-5}\\cmidrule(r){6-7}')
+
+    ## content
+    content <- print(xtable(out),
+                     include.rownames = FALSE,
+                     caption.placement = 'top',
+                     booktabs = TRUE,
+                     only.contents = TRUE,
+                     sanitize.text.function = function(x){x},
+                     floating = FALSE,
+                     hline.after = c(-1, 0, nrow(out) - 2, nrow(out)),
+                     print.results = FALSE)
+
+    ## footer
+    foot <- c('\\end{tabularx}',
+              '}',
+              '\\begin{tablenotes}',
+              '\\footnotesize',
+              '\\vspace{.5em}',
+              '\\item {\\itshape Notes.} ',
+              note,
+              '\\item $^{**}$ indicates significance at the 5\\% level, ' %+%
+              'with adjustment for significance to take into account ' %+%
+              'potential survey design effects ($z_{critical} \\approx 4.25$)',
+              '\\item $^{*}$ indicates significance at the 10\\% level, ' %+%
+              'with adjustment for significance to take into account ' %+%
+              'potential survey design effects ($z_{critical} \\approx 3.57$)',
+              '\\end{tablenotes}',
+              '\\end{threeparttable}',
+              '\\end{table}')
+
+    ## write
+    writeLines(c(head,content,foot), con = odir %+% texfile)
+    writeLines(c(head,content,foot))
+}
+
+@
+
+
+<<results_cuts, results='asis'>>=
+
+caption <- 'Results of conditional logistic choice model of ' %+%
+    'student college decision among students who attended a ' %+%
+    'postsecondary institution within two years of high school ' %+%
+    'graduation.'
+
+lab <- 'tab:clogit_cuts'
+note <- 'Odds ratios are reported, with $z$-scores in parentheses. Standard errors (not reported) were clustered at the student level. See notes for Table \\ref{tab:clogit} on variable construction and controls included in the model but not reported. For comparison, results reported in columns 1 and 2 are the same as those reported in columns 7 and 8 of Table \\ref{tab:clogit}. The outcome for the apply model (columns 3 and 4) is equal to one for all schools to which a student applied. The outcome for the attendance conditional on application model (last two columns) equals one for the school which the student attended, but with a choice set limited to schools to which the student applied. Per NCES regulations for restricted access data, both observation cell sizes and unique cases have been rounded to the nearest 10 and 1000, respectively.'
+
+resultsTabPrint('asclogit_main_mat.csv',
+                'asclogit_main_apply_mat.csv',
+                'asclogit_main_apply_attend_mat.csv',
+                caption,
+                lab,
+                note,
+                'cl_main.tex')
+
+@
+
+<<results_cuts_hisat, results='asis'>>=
+
+caption <- 'Results of conditional logistic choice model of ' %+%
+    'student college decision among high SAT ($>$ 1100) students ' %+%
+    'who attended a postsecondary institution within two years of ' %+%
+    'high school graduation.'
+
+lab <- 'tab:clogit_hisat'
+note <- 'See notes for Table \\ref{tab:clogit_cuts}'
+
+resultsTabPrint('asclogit_hisat_mat.csv',
+                'asclogit_hisat_apply_mat.csv',
+                'asclogit_hisat_apply_attend_mat.csv',
+                caption,
+                lab,
+                note,
+                'cl_hisat.tex')
+
+@
+
+<<results_cuts_lowinc, results='asis'>>=
+
+caption <- 'Results of conditional logistic choice model of ' %+%
+    'student college decision among low income ($<$ \\$25k) students ' %+%
+    'who attended a postsecondary institution within two years ' %+%
+    'of high school graduation.'
+
+lab <- 'tab:clogit_lowinc'
+
+resultsTabPrint('asclogit_lowinc_mat.csv',
+                'asclogit_lowinc_apply_mat.csv',
+                'asclogit_lowinc_apply_attend_mat.csv',
+                caption,
+                lab,
+                note,
+                'cl_lowinc.tex')
+@
+
+<<mostlik, results='asis'>>=
+## set up matrix
+out <- matrix(' ',41,8)
+
+## read in data
+mostlik <- read.csv(tdir %+% 'main_logit_mat.csv')
+mostlik2 <- read.csv(tdir %+% 'main_apply_logit_mat.csv')
+mostlik3 <- read.csv(tdir %+% 'main_apply_attend_logit_mat.csv')
+neartyr <- read.csv(tdir %+% 'neartyr_logit_mat.csv')
+
+mostlikm <- read.csv(tdir %+% 'main_marg_logit_mat.csv')
+mostlikm2 <- read.csv(tdir %+% 'main_apply_marg_logit_mat.csv')
+mostlikm3 <- read.csv(tdir %+% 'main_apply_attend_marg_logit_mat.csv')
+neartyrm <- read.csv(tdir %+% 'neartyr_marg_logit_mat.csv')
+
+## grab Ns vector
+N <- c(mostlik$obs[1],
+       mostlik2$obs[1],
+       mostlik3$obs[1],
+       neartyr$obs[1],
+       mostlikm$obs[1],
+       mostlikm2$obs[1],
+       mostlikm3$obs[1],
+       neartyrm$obs[1])
+
+## subset to or and z-scores
+mostlik <- mostlik[,c('or','z')]
+mostlikm <- mostlikm[,c('or','z')]
+mostlik2 <- mostlik2[,c('or','z')]
+mostlikm2 <- mostlikm2[,c('or','z')]
+mostlik3 <- mostlik3[,c('or','z')]
+mostlikm3 <- mostlikm3[,c('or','z')]
+neartyr <- neartyr[,c('or','z')]
+neartyrm <- neartyrm[,c('or','z')]
+
+## convert z scores to absolute values
+mostlik$z <- abs(mostlik$z)
+mostlikm$z <- abs(mostlikm$z)
+mostlik2$z <- abs(mostlik2$z)
+mostlikm2$z <- abs(mostlikm2$z)
+mostlik3$z <- abs(mostlik3$z)
+mostlikm3$z <- abs(mostlikm3$z)
+neartyr$z <- abs(neartyr$z)
+neartyrm$z <- abs(neartyrm$z)
+
+## round and format
+mostlik$or <- format(round(mostlik$or,4),4)
+mostlik$z <- format(round(mostlik$z,2),2)
+mostlikm$or <- format(round(mostlikm$or,4),4)
+mostlikm$z <- format(round(mostlikm$z,2),2)
+
+mostlik2$or <- format(round(mostlik2$or,4),4)
+mostlik2$z <- format(round(mostlik2$z,2),2)
+mostlikm2$or <- format(round(mostlikm2$or,4),4)
+mostlikm2$z <- format(round(mostlikm2$z,2),2)
+
+mostlik3$or <- format(round(mostlik3$or,4),4)
+mostlik3$z <- format(round(mostlik3$z,2),2)
+mostlikm3$or <- format(round(mostlikm3$or,4),4)
+mostlikm3$z <- format(round(mostlikm3$z,2),2)
+
+neartyr$or <- format(round(neartyr$or,4),4)
+neartyr$z <- format(round(neartyr$z,2),2)
+neartyrm$or <- format(round(neartyrm$or,4),4)
+neartyrm$z <- format(round(neartyrm$z,2),2)
+
+## add stars
+hiz <- (as.numeric(mostlik$z) >= 1.96)
+mostlik$or[hiz] <- gsub('(.*)', '\\1**', mostlik$or[hiz])
+hiz <- (as.numeric(mostlikm$z) >= 1.96)
+mostlikm$or[hiz] <- gsub('(.*)', '\\1**', mostlikm$or[hiz])
+
+hiz <- (as.numeric(mostlik2$z) >= 1.96)
+mostlik2$or[hiz] <- gsub('(.*)', '\\1**', mostlik2$or[hiz])
+hiz <- (as.numeric(mostlikm2$z) >= 1.96)
+mostlikm2$or[hiz] <- gsub('(.*)', '\\1**', mostlikm2$or[hiz])
+
+hiz <- (as.numeric(mostlik3$z) >= 1.96)
+mostlik3$or[hiz] <- gsub('(.*)', '\\1**', mostlik3$or[hiz])
+hiz <- (as.numeric(mostlikm3$z) >= 1.96)
+mostlikm3$or[hiz] <- gsub('(.*)', '\\1**', mostlikm3$or[hiz])
+
+hiz <- (as.numeric(neartyr$z) >= 1.96)
+neartyr$or[hiz] <- gsub('(.*)', '\\1**', neartyr$or[hiz])
+hiz <- (as.numeric(neartyrm$z) >= 1.96)
+neartyrm$or[hiz] <- gsub('(.*)', '\\1**', neartyrm$or[hiz])
+
+hiz <- (as.numeric(mostlik$z) >= 1.64 & as.numeric(mostlik$z) < 1.96)
+mostlik$or[hiz] <- gsub('(.*)', '\\1*', mostlik$or[hiz])
+hiz <- (as.numeric(mostlikm$z) >= 1.64 & as.numeric(mostlikm$z) < 1.96)
+mostlikm$or[hiz] <- gsub('(.*)', '\\1*', mostlikm$or[hiz])
+
+hiz <- (as.numeric(mostlik2$z) >= 1.64 & as.numeric(mostlik2$z) < 1.96)
+mostlik2$or[hiz] <- gsub('(.*)', '\\1*', mostlik2$or[hiz])
+hiz <- (as.numeric(mostlikm2$z) >= 1.64 & as.numeric(mostlikm2$z) < 1.96)
+mostlikm2$or[hiz] <- gsub('(.*)', '\\1*', mostlikm2$or[hiz])
+
+hiz <- (as.numeric(mostlik3$z) >= 1.64 & as.numeric(mostlik3$z) < 1.96)
+mostlik3$or[hiz] <- gsub('(.*)', '\\1*', mostlik3$or[hiz])
+hiz <- (as.numeric(mostlikm3$z) >= 1.64 & as.numeric(mostlikm3$z) < 1.96)
+mostlikm3$or[hiz] <- gsub('(.*)', '\\1*', mostlikm3$or[hiz])
+
+hiz <- (as.numeric(neartyr$z) >= 1.64 & as.numeric(neartyr$z) < 1.96)
+neartyr$or[hiz] <- gsub('(.*)', '\\1*', neartyr$or[hiz])
+hiz <- (as.numeric(neartyrm$z) >= 1.64 & as.numeric(neartyrm$z) < 1.96)
+neartyrm$or[hiz] <- gsub('(.*)', '\\1*', neartyrm$or[hiz])
+
+## zip to alternate; round; format
+mostlik <- c(rbind(mostlik$or, mostlik$z))
+mostlikm <- c(rbind(mostlikm$or, mostlikm$z))
+
+mostlik2 <- c(rbind(mostlik2$or, mostlik2$z))
+mostlikm2 <- c(rbind(mostlikm2$or, mostlikm2$z))
+
+mostlik3 <- c(rbind(mostlik3$or, mostlik3$z))
+mostlikm3 <- c(rbind(mostlikm3$or, mostlikm3$z))
+
+neartyr <- c(rbind(neartyr$or, neartyr$z))
+neartyrm <- c(rbind(neartyrm$or, neartyrm$z))
+
+## ---------------------------
+## build out table
+## ---------------------------
+
+## chunk 1
+out[2:9,1:8] <- c(mostlik[3:10],
+                  mostlik2[3:10],
+                  mostlik3[3:10],
+                  neartyr[3:10],
+                  mostlikm[3:10],
+                  mostlikm2[3:10],
+                  mostlikm3[3:10],
+                  neartyrm[3:10])
+
+## chunk 2
+out[12:15,1:8] <- c(mostlik[11:14],
+                    mostlik2[11:14],
+                    mostlik3[11:14],
+                    neartyr[11:14],
+                    mostlikm[11:14],
+                    mostlikm2[11:14],
+                    mostlikm3[11:14],
+                    neartyrm[11:14])
+
+## chunk 3
+out[18:35,1:8] <- c(mostlik[17:34],
+                    mostlik2[17:34],
+                    mostlik3[17:34],
+                    neartyr[17:34],
+                    mostlikm[17:34],
+                    mostlikm2[17:34],
+                    mostlikm3[17:34],
+                    neartyrm[17:34])
+
+## chunk 4
+out[38:39,1:8] <- c(mostlik[15:16],
+                    mostlik2[15:16],
+                    mostlik3[15:16],
+                    neartyr[15:16],
+                    mostlikm[15:16],
+                    mostlikm2[15:16],
+                    mostlikm3[15:16],
+                    neartyrm[15:16])
+
+## add Ns
+out[41,1:8] <- N
+
+## add parentheses to se rows
+sr <- c(3,5,7,9,13,15,19,21,23,25,27,29,31,33,35,39)
+out[sr,] <- gsub('(.*)', '(\\1)', out[sr,])
+
+vars <- c('{\\itshape College costs}',
+          'Cost',
+          '\\hspace{1em}(per \\$1000)',
+          'Cost$^2$',
+          '\\hspace{1em}(per $\\$1000^2$)',
+          'Distance',
+          '\\hspace{1em}(per 100 miles)',
+          'Distance$^2$',
+          '\\hspace{1em}(per $100^2$ miles)',
+          ' ',
+          '{\\itshape Instructional Quality}',
+          'Instructional expend.',
+          '\\hspace{1em}(per \\$1000)',
+          'Instructional expend.$^2$',
+          '\\hspace{1em}(per $\\$1000^2$)',
+          ' ',
+          '{\\itshape Student}',
+          'SAT \\%tile (10s)',
+          ' ',
+          'Family income',
+          ' ',
+          'Parental education',
+          ' ',
+          'Female',
+          ' ',
+          'Black',
+          ' ',
+          'Hispanic',
+          ' ',
+          'Asian, Hawaii/P. Islander',
+          ' ',
+          'Amer. Indian/Alaska Native',
+          ' ',
+          'More than one race',
+          ' ',
+          ' ',
+          '{\\itshape Labor Market}',
+          'County unem. rate (2004)',
+          '',
+          ' ',
+          '$N$')
+
+## add rows
+out <- cbind(vars, out)
+colnames(out) <- c(' ', 'Most-likely (attend)',
+                   'Most-likely (apply)',
+                   'Most-likely (att$\\mid$app)',
+                   'Closest public 2-year',
+                   'Most-likely (attend)',
+                   'Most-likely (apply)',
+                   'Most-likely (att$\\mid$app)',
+                   'Closest public 2-year')
+
+## header
+head <- c('\\begin{table}',
+          '\\begin{threeparttable}',
+          '\\caption{Comparison of college enrollment decision between ' %+%
+          'models using most likely institution and models using nearest ' %+%
+          'public two-year institution.}',
+          '\\label{tab:logit}',
+          '{\\scriptsize',
+          '\\begin{tabularx}{\\textwidth}{X*{8}{>{\\TC}p{3.7em}}}',
+          '\\toprule',
+          '&\\multicolumn{4}{c}{All}&\\multicolumn{4}{c}{Low Income/Low SAT} \\\\',
+          '\\cmidrule(r){2-5}\\cmidrule(r){6-9}')
+
+## content
+content <- print(xtable(out),
+                 include.rownames = FALSE,
+                 caption.placement = 'top',
+                 booktabs = TRUE,
+                 only.contents = TRUE,
+                 sanitize.text.function = function(x){x},
+                 floating = FALSE,
+                 hline.after = c(-1, 0, nrow(out) - 1, nrow(out)),
+                 print.results = FALSE)
+
+## footer
+foot <- c('\\end{tabularx}',
+          '}',
+          '\\begin{tablenotes}',
+          '\\footnotesize',
+          '\\vspace{.5em}',
+          '\\item {\\itshape Notes.} Odds ratios are reported, with ' %+%
+          '$z$-scores in ' %+%
+          'parentheses. Students included in the low income/low SAT column ' %+%
+          'reported family incomes lower than \\$25,000 per year or had ' %+%
+          'an SAT or SAT-equivalent score < 900. Additional controls ' %+%
+          'include cubic distance, FTE college enrollment, and FTE squared. ' %+%
+          'Per NCES regulations for restricted ' %+%
+          'access data, observation numbers have been rounded to the ' %+%
+          'nearest 10.',
+          '\\item $^{**}$ indicates significance at the 5\\% level.',
+          '\\item $^{*}$ indicates significance at the 10\\% level.',
+          '\\end{tablenotes}',
+          '\\end{threeparttable}',
+          '\\end{table}')
+
+## write
+writeLines(c(head,content,foot), con = odir %+% 'logit.tex')
+writeLines(c(head,content,foot))
+
+@
+
+
+% simulation desc
+<<simulation_desc, results='asis'>>=
+
+writeLines(readLines(odir %+% 'simulation_desc.tex'))
+
+@
+
+
+\end{document}
+
+
