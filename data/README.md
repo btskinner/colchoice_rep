@@ -6,7 +6,7 @@ All data files should placed in this directory.
 
 The following ELS restricted data files are needed:  
 
-* `Geocodes.dat`
+* `Geocodes.dat`  
 * `byf3stu.dta`  
 * `f2inst.dta`  
 * `f3inst.dta`  
@@ -37,8 +37,26 @@ The following public files need to be downloaded:
 
 Other files already in the data directory:  
 
-* `county_cen.txt`  
-* `colfips2004.csv`  
+* `county_cen.txt` (From [county_centers.csv](https://github.com/btskinner/spatial))  
+* `colfips2004.csv` (See note below)  
+
+`colfips2004.csv` can be made from the file created by
+`./scripts/ipedsgeo.r`:
+
+```r
+## library
+library(tidyverse)
+
+## read in file
+load(../data/ipedsyeargeo.rda)
+
+## rename
+df <- geolist$y2004 %>% select(unitid, lon = longitud, lat = latitude)
+
+## write
+write_csv(df, '../data/colfips2004.csv)
+
+```
 
 ## Simulation
 

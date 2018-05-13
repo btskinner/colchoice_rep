@@ -11,5 +11,8 @@ following order.
 Two helper scripts, `csv2tex.r` and `est2csv.do`, should remain in the
 directory, but do not need to be called on their own.
 
+Another file, `ipedsgeo.r`, can be used to create `colfips2004.csv`
+(see instructions in Data directory README file).
+
 After the scripts are run, paper tables can be reproduced using
 `tables.rnw` in the `./tables` subdirectory.  
