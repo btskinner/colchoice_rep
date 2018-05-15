@@ -31,7 +31,8 @@ The following public files need to be downloaded:
 ### Census
 
 * [`blkgrp_pop_centroid_withname.txt`](http://www2.census.gov/geo/docs/reference/cenpop2000/blkgrp/bg_popcen.zip)  
-* [`tract_pop.txt`](https://www2.census.gov/geo/docs/reference/cenpop2000/tract/tract_pop.txt)  
+*
+[`tract_pop.txt`](https://www2.census.gov/geo/docs/reference/cenpop2000/tract/tract_pop.txt)  
 
 ## Included
 
@@ -72,4 +73,23 @@ need the following data files from the [American Community Survey](https://factf
 * `ACS_10_5YR_S2301_1.csv`  
 * `ACS_10_5YR_S2301_2.csv`  
 
+You will also need TIGER census tract shapefiles (one file for each
+state) for the year 2010. They can be downloaded
+[here](https://www.census.gov/geo/maps-data/data/cbf/cbf_tracts.html). Once
+unzipped, the files should come in threes and look like:  
+
+* `gz_2010_01_140_00_500k.dbf`  
+* `gz_2010_01_140_00_500k.prj`  
+* `gz_2010_01_140_00_500k.shp`  
+* `gz_2010_01_140_00_500k.shx`  
+* `gz_2010_01_140_00_500k.xml`  
+* `gz_2010_02_140_00_500k.dbf`  
+* `gz_2010_02_140_00_500k.prj`  
+* `gz_2010_02_140_00_500k.shp`  
+* `gz_2010_02_140_00_500k.shx`  
+* `gz_2010_02_140_00_500k.xml`  
+* ...
+
+A set of files for the United States as a whole (`gz_2010_us_040_00_500k.*`), can be downloaded
+[here](https://www2.census.gov/geo/tiger/GENZ2010/gz_2010_us_040_00_500k.zip).  
 
