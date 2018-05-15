@@ -10,9 +10,9 @@ echo "SLURM_JOBID: " $SLURM_JOBID
 echo "SLURM_ARRAY_TASK_ID: " $SLURM_ARRAY_TASK_ID
 echo "SLURM_ARRAY_JOB_ID: " $SLURM_ARRAY_JOB_ID
 
-t="/data/skinneb1/geo/popcen/tract/2010/"
-i="~/colchoice/estdat/"
-o="~/colchoice/estdat/mostlikpred/"
+t="<path>/<to>/<census tract files>/"
+i="<path>/<to>/<model estimates>/"
+o="<path>/<to>/<output predictions>/"
 n=${SLURM_ARRAY_TASK_ID}
 
 typ=$1
