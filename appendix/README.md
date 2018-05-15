@@ -110,4 +110,8 @@ Rscript --vanilla simulation_maps_us.R 5
 
 The resulting map will be about 50Mb and may take a while to compile.
 
+## SLURM files
 
+The scripts `makepreds.sh` and `simulation_pred.slurm` that were used
+on the ACCRE cluster are included for information, but are not needed
+for replication.
